@@ -1,0 +1,69 @@
+name: Gcp_simple_smoketest_cred_gcs
+parameters:
+  cloudProvider: GCP
+  blueprintName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
+  cleanUp: false
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+
+  # integratontest.gcpcredential params must be set in application.yml
+  - name: gcp_credential_test
+    parameters:
+      credentialName: its-gcp-credandsmoke-cred-gcs
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpCredentialCreationTest
+
+  - name: create gateway template
+    parameters:
+      gcpName: it-gcp-credandsmoke-gateway-gcs
+      gcpInstanceType: n1-standard-4
+      volumeType: pd-standard
+      volumeCount: 1
+      volumeSize: 30
+      templateAdditions: "master,1,GATEWAY"
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+
+  - name: create worker template
+    parameters:
+      gcpName: it-gcp-credandsmoke-worker-gcs
+      gcpInstanceType: n1-highmem-8
+      volumeType: pd-standard
+      volumeCount: 2
+      volumeSize: 100
+      templateAdditions: "worker,1;"
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+
+  - name: create compute template
+    parameters:
+      gcpName: it-gcp-credandsmoke-compute-gcs
+      gcpInstanceType: n1-highcpu-4
+      volumeType: pd-ssd
+      volumeCount: 3
+      volumeSize: 500
+      templateAdditions: "compute,3"
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+
+
+  - name: set gcp filesystem
+    parameters:
+      bucketName: hm-bucket
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpConfigureGcsTest
+
+  - name: create cluster
+    parameters:
+      stackName: it-gcp-cred-gcs
+      region: europe-west1
+      availabilityZone: europe-west1-b
+      clusterName: it-gcp-cred-gcs
+      withGcsFs: true
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest

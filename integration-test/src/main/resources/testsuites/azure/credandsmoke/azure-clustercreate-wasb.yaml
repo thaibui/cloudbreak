@@ -1,0 +1,65 @@
+name: Azure_simple_smoketest_cred
+parameters:
+  cloudProvider: AZURE
+  blueprintName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+
+  # integratontest.azurermcredential params must be set in application.yml
+  - name: azure_rm_credential_test
+    parameters:
+      credentialName: itsazurermcredandsmokecred
+    classes:
+      - com.sequenceiq.it.cloudbreak.azure.AzureCredentialCreationTest
+
+  - name: create gateway template
+    parameters:
+      azureTemplateName: it-azurerm-credandsmoke-gateway-wasb
+      azureVmType: Standard_D4
+      azureVolumeCount: 1
+      azureVolumeSize: 50
+      templateAdditions: "master,1,GATEWAY"
+    classes:
+      - com.sequenceiq.it.cloudbreak.azure.AzureTemplateCreationTest
+
+  - name: create worker template
+    parameters:
+      azureTemplateName: it-azurerm-credandsmoke-worker-wasb
+      azureVmType: Standard_D4
+      azureVolumeCount: 1
+      azureVolumeSize: 100
+      templateAdditions: "worker,1;"
+    classes:
+      - com.sequenceiq.it.cloudbreak.azure.AzureTemplateCreationTest
+
+  - name: create compute template
+    parameters:
+      azureTemplateName: it-azurerm-credandsmoke-compute-wasb
+      azureVmType: Standard_D11
+      azureVolumeCount: 1
+      azureVolumeSize: 200
+      templateAdditions: "compute,3"
+    classes:
+      - com.sequenceiq.it.cloudbreak.azure.AzureTemplateCreationTest
+
+  - name: set wasb filesystem
+    parameters:
+      accountName: ittestingcb
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureConfigureFsTest
+
+  - name: create cluster
+    parameters:
+      stackName: it-azure-cred-wasb
+      region: North Europe
+      clusterName: it-azure-cred-wasb
+      persistentStorage: cbstore
+      sleepTime: 60000
+      withGcsFs: true
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
