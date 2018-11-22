@@ -32,7 +32,7 @@ for term in terms["items"]:
     item["value"] = vmAttributes["instanceType"]
     item["meta"]= {}
     item["meta"]["properties"] = {}
-    item["meta"]["properties"]["Memory"] = vmAttributes["memory"].split(' ')[0]
+    item["meta"]["properties"]["Memory"] = float(vmAttributes["memory"].split(' ')[0].replace(',',''))
     item["meta"]["properties"]["Cpu"] = vmAttributes["vcpu"]
 
     priceDimensions = term["priceDimensions"]
@@ -78,10 +78,10 @@ for term in terms["items"]:
         maximumNumber = 0
     else:
         spittedStorage = storage.split(" x ")
-        minimumSize = spittedStorage[1].split(" ")[0]
-        maximumSize = spittedStorage[1].split(" ")[0]
-        minimumNumber = spittedStorage[0]
-        maximumNumber = spittedStorage[0]
+        minimumSize = int(spittedStorage[1].split(" ")[0].replace(',',''))
+        maximumSize = int(spittedStorage[1].split(" ")[0].replace(',', ''))
+        minimumNumber = int(spittedStorage[0].replace(',', ''))
+        maximumNumber = int(spittedStorage[0].replace(',', ''))
 
     item["meta"]["configs"].append({
        "volumeParameterType": "EPHEMERAL",
