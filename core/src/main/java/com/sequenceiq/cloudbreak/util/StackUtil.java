@@ -35,10 +35,21 @@ public class StackUtil {
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
     public Set<Node> collectNodes(Stack stack) {
+        return collectNodes(stack, false);
+    }
+
+    public Set<Node> collectNewlyCreatedNodes(Stack stack) {
+        return collectNodes(stack, true);
+    }
+
+    private Set<Node> collectNodes(Stack stack, boolean newlyCreated) {
         Set<Node> agents = new HashSet<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             if (instanceGroup.getNodeCount() != 0) {
-                for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+                Set<InstanceMetaData> instances = newlyCreated
+                    ? instanceGroup.getNewlyCreatedInstanceMetaDataSet()
+                    : instanceGroup.getNotDeletedInstanceMetaDataSet();
+                for (InstanceMetaData im : instances) {
                     if (im.getDiscoveryFQDN() != null) {
                         agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getDiscoveryFQDN(), im.getInstanceGroupName()));
                     }
